@@ -33,7 +33,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+// import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -74,7 +75,7 @@ public class OmniOpMode extends LinearOpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
-    private DcMotor launcherLeft = null;
+    private DcMotorEx launcherLeft = null;
     private Servo kicker = null;
 
     @Override
@@ -86,7 +87,7 @@ public class OmniOpMode extends LinearOpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
         frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
-        launcherLeft = hardwareMap.get(DcMotor.class, "LL");
+        launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
         kicker = hardwareMap.get(Servo.class, "kicker");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -102,7 +103,7 @@ public class OmniOpMode extends LinearOpMode {
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        launcherLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        launcherLeft.setDirection(DcMotorEx.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -149,9 +150,10 @@ public class OmniOpMode extends LinearOpMode {
             backRightDrive.setPower(backRightPower);
 
             // launcher
-            double triggerValue = gamepad2.left_trigger;
-            launcherLeft.setPower(triggerValue*2);
-
+            if (gamepad2.right_bumper) {
+                launcherLeft.setVelocity(2000);
+            }
+            else launcherLeft.setPower(0);
             // kicker
             if(gamepad2.b) {
                 kicker.setPosition(0.85);
@@ -162,7 +164,6 @@ public class OmniOpMode extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
-            telemetry.addData("Trigger Value", triggerValue);
             telemetry.addData("Motor Power", launcherLeft.getPower());
             telemetry.update();
         }

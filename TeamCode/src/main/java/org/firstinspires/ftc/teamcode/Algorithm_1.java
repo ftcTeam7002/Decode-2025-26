@@ -32,7 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -54,33 +55,31 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Drive by time for free points :3", group="Robot")
+@Autonomous(name="Algorithm 1", group="Robot")
 
-public class EasyPointsAuto extends LinearOpMode {
+public class Algorithm_1 extends LinearOpMode {
 
     /* Declare OpMode members. */
-    private DcMotor         frontLeftDrive   = null;
+    private DcMotor frontLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backLeftDrive = null;
     private DcMotor backRightDrive = null;
-    private DcMotor launcherLeft = null;
-    private DcMotor kicker = null;
-    private ElapsedTime     runtime = new ElapsedTime();
+    private DcMotorEx launcherLeft = null;
+    private Servo kicker = null;
+    private ElapsedTime runtime = new ElapsedTime();
 
-
-    static final double     FORWARD_SPEED = 0.6;
-    static final double     REVERSE_SPEED = 0.6;
-
+    static final double FORWARD_SPEED = 0.6;
+    static final double REVERSE_SPEED = -0.6;
     @Override
     public void runOpMode() {
 
         // Initialize the drive system variables.
-        frontLeftDrive  = hardwareMap.get(DcMotor.class, "FL");
+        frontLeftDrive = hardwareMap.get(DcMotor.class, "FL");
         frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
         backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
-        launcherLeft = hardwareMap.get(DcMotor.class,"LL" );
-        kicker = hardwareMap.get(DcMotor.class, "kicker");
+        launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
+        kicker = hardwareMap.get(Servo.class, "kicker");
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -88,6 +87,7 @@ public class EasyPointsAuto extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //
         telemetry.update();
@@ -95,24 +95,58 @@ public class EasyPointsAuto extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
 
-        // Step through each leg of the path, ensuring that the OpMode has not been stopped along the way.
-
-        // Launch and Reverse left= forward for reverse
-        launcherLeft.setPower(1);
+        // Launch and Reverse  left= forward for reverse
+        launcherLeft.setDirection(DcMotor.Direction.FORWARD);
 
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.0)) {
-            telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }
-        // Step 2:  Stop
-        frontLeftDrive.setPower(0);
-        frontRightDrive.setPower(0);
-        backLeftDrive.setPower(0);
-        backRightDrive.setPower(0);
+        while (opModeIsActive() && (runtime.seconds() < 5.0)) {
+                telemetry.addData("Velocity", launcherLeft.getVelocity());
+                telemetry.setMsTransmissionInterval(250);
+                telemetry.update();
 
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-        sleep(1000);
+            telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());
+            telemetry.addData("Velocity", launcherLeft.getVelocity() + "   " + runtime.toString());
+            telemetry.update();
+            // reverse
+            frontLeftDrive.setPower(REVERSE_SPEED);
+            frontRightDrive.setPower(REVERSE_SPEED);
+            backLeftDrive.setPower(REVERSE_SPEED);
+            backRightDrive.setPower(REVERSE_SPEED);
+            sleep(290);
+            frontLeftDrive.setPower(0);
+            frontRightDrive.setPower(0);
+            backLeftDrive.setPower(0);
+            backRightDrive.setPower(0);
+            // launch
+            launcherLeft.setVelocity(1800);
+            sleep(2000);
+            kicker.setPosition(0.85);
+            sleep(500);
+            kicker.setPosition(1);
+            sleep(1500);
+            kicker.setPosition(0.85);
+            sleep(500);
+            kicker.setPosition(1);
+            sleep(1500);
+            kicker.setPosition(0.85);
+            sleep(1000);
+            kicker.setPosition(1);
+            launcherLeft.setPower(0);
+//             strafe
+            frontLeftDrive.setPower(REVERSE_SPEED);
+            frontRightDrive.setPower(FORWARD_SPEED);
+            backLeftDrive.setPower(FORWARD_SPEED);
+            backRightDrive.setPower(REVERSE_SPEED);
+            sleep(900);
+            // Step 2:  Stop
+            frontLeftDrive.setPower(0);
+            frontRightDrive.setPower(0);
+            backLeftDrive.setPower(0);
+            backRightDrive.setPower(0);
+
+            telemetry.addData("Path", "Complete");
+            telemetry.update();
+            sleep(1000);
+        }
     }
 }

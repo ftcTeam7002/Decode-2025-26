@@ -162,4 +162,3 @@ public class AprilTag_Idea extends LinearOpMode {
     }   // end method telemetryAprilTag()
 
 }   // end class
-// Golden
