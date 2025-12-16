@@ -18,11 +18,11 @@ public class odometry_test extends LinearOpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor backRightDrive = null;
     private DcMotorEx launcherLeft = null;
-    // Encoder ||||||||||||||||||||||||||||||||||||||||||||||||||||||\\
+    // Encoder ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public DcMotor odometerLeft;
     public DcMotor odometerRight;
     public DcMotor odometerAux;
-    // Kicker||||||||||||||||||||||||||||||||||||||||||||||||||||||||\\
+    // Kicker||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     private Servo kicker = null;
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -30,7 +30,7 @@ public class odometry_test extends LinearOpMode {
     static final double REVERSE_SPEED = -0.6;
 
     // Ticks per inch (change for your wheel + encoder)
-    public static final double TICKS_PER_INCH = 212.201591512;
+    public static final double TICKS_PER_INCH = 1058.33545;
     // 9.425 inches per revolution
 
 
@@ -39,8 +39,11 @@ public class odometry_test extends LinearOpMode {
 
         // Initialize the drive system variables.
         frontLeftDrive = hardwareMap.get(DcMotor.class, "FL");
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive = hardwareMap.get(DcMotor.class, "BL");
+        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
 
@@ -65,7 +68,7 @@ public class odometry_test extends LinearOpMode {
 
         // Reset odometry encoder only
         // ---------------------
-//odometerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //odometerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //      odometerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         odometerAux.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -89,14 +92,16 @@ public class odometry_test extends LinearOpMode {
         backLeftDrive.setPower(FORWARD_SPEED);
         backRightDrive.setPower(REVERSE_SPEED);
 
+        double auxposition = odometerAux.getCurrentPosition();
+        while (opModeIsActive() && Math.abs(auxposition) < targetTicks) {
 
-        while (opModeIsActive() && Math.abs(odometerAux.getCurrentPosition()) < targetTicks) {
-
+            auxposition = odometerAux.getCurrentPosition();
             telemetry.addData("Odometry Ticks", odometerAux.getCurrentPosition());
             //  telemetry.addData("Odometry Ticks", odometerRight.getCurrentPosition());
             // telemetry.addData("Odometry Ticks", odometerLeft.getCurrentPosition());
             telemetry.addData("Target Ticks", targetTicks);
             telemetry.update();
+            sleep(50);
         }
 
         frontLeftDrive.setPower(0);
