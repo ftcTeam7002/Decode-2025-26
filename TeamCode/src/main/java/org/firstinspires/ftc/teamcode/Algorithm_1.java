@@ -65,7 +65,7 @@ public class Algorithm_1 extends LinearOpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor backRightDrive = null;
     private DcMotorEx launcherLeft = null;
-    private Servo kicker = null;
+    private DcMotorEx intakeWheels = null;
     private ElapsedTime runtime = new ElapsedTime();
 
     static final double FORWARD_SPEED = 0.6;
@@ -79,7 +79,7 @@ public class Algorithm_1 extends LinearOpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
-        kicker = hardwareMap.get(Servo.class, "kicker");
+        intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -120,17 +120,17 @@ public class Algorithm_1 extends LinearOpMode {
             // launch
             launcherLeft.setVelocity(1800);
             sleep(2000);
-            kicker.setPosition(0.85);
+            intakeWheels.setVelocity(0.85);
             sleep(500);
-            kicker.setPosition(1);
+            intakeWheels.setVelocity(1);
             sleep(1500);
-            kicker.setPosition(0.85);
+            intakeWheels.setVelocity(0.85);
             sleep(500);
-            kicker.setPosition(1);
+            intakeWheels.setVelocity(1);
             sleep(1500);
-            kicker.setPosition(0.85);
+            intakeWheels.setVelocity(0.85);
             sleep(1000);
-            kicker.setPosition(1);
+            intakeWheels.setVelocity(4);
             launcherLeft.setPower(0);
 //             strafe
             frontLeftDrive.setPower(REVERSE_SPEED);

@@ -1,18 +1,26 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.provider.ContactsContract;
+
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Autonomous(name = "Odo test", group = "Robot")
 
 public class odometry_test extends LinearOpMode {
 
     /* Declare OpMode members. */
+    private IMU imu;
     private DcMotor frontLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backLeftDrive = null;
@@ -20,7 +28,6 @@ public class odometry_test extends LinearOpMode {
     private DcMotorEx launcherLeft = null;
     // Encoder ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public DcMotor odometerLeft;
-    public DcMotor odometerRight;
     public DcMotor odometerAux;
     // Kicker||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     private Servo kicker = null;
@@ -30,25 +37,31 @@ public class odometry_test extends LinearOpMode {
     static final double REVERSE_SPEED = -0.6;
 
     // Ticks per inch (change for your wheel + encoder)
-    public static final double TICKS_PER_INCH = 1058.33545;
+    public static final double TICKS_PER_INCH = 1058.34;
     // 9.425 inches per revolution
 
 
     @Override
     public void runOpMode() {
 
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot.LogoFacingDirection logo = RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection usb = RevHubOrientationOnRobot.UsbFacingDirection.LEFT;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logo, usb);
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
         // Initialize the drive system variables.
         frontLeftDrive = hardwareMap.get(DcMotor.class, "FL");
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRightDrive = hardwareMap.get(DcMotor.class, "BL");
+        backRightDrive = hardwareMap.get(DcMotor.class, "BR");
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
+        odometerAux = frontRightDrive;
+        frontRightDrive.getCurrentPosition();
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-
-        backLeftDrive = hardwareMap.get(DcMotor.class, "BR");
-        odometerAux = backLeftDrive;
+        backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
+        odometerLeft = backLeftDrive;
         backLeftDrive.getCurrentPosition();
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -57,23 +70,20 @@ public class odometry_test extends LinearOpMode {
         kicker = hardwareMap.get(Servo.class, "kicker");
 
 
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct
-        // drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        // Drive code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        imu.resetYaw();
 
-        // Reset odometry encoder only
-        // ---------------------
-        //odometerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //      odometerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        backLeftDrive.setPower(0);
+        backRightDrive.setPower(0);
+        frontRightDrive.setPower(0);
+        frontLeftDrive.setPower(0);
+//        Reset odometry encoder only
+//         ---------------------
+        odometerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         odometerAux.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        //  odometerRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        // odometerLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        odometerLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         odometerAux.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
@@ -83,22 +93,34 @@ public class odometry_test extends LinearOpMode {
 
         // Drive forward until odometry wheel reaches the target
         // ---------------------
-        int targetTicks = (int) (12 * TICKS_PER_INCH);
-                             // ^^inches
 
+        int targetTicks = (int) (2 * TICKS_PER_INCH);
+        int targetTicks2 = (int) (2 * TICKS_PER_INCH);
         // Start driving forward (simple open-loop power) main movement until while loop
-        frontLeftDrive.setPower(REVERSE_SPEED);
-        frontRightDrive.setPower(FORWARD_SPEED);
+        frontLeftDrive.setPower(FORWARD_SPEED);
+        frontRightDrive.setPower(REVERSE_SPEED);
         backLeftDrive.setPower(FORWARD_SPEED);
         backRightDrive.setPower(REVERSE_SPEED);
+        sleep(50);
+        frontLeftDrive.setPower(FORWARD_SPEED);
+        frontRightDrive.setPower(REVERSE_SPEED);
+        backLeftDrive.setPower(REVERSE_SPEED);
+        backRightDrive.setPower(FORWARD_SPEED);
 
         double auxposition = odometerAux.getCurrentPosition();
-        while (opModeIsActive() && Math.abs(auxposition) < targetTicks) {
+        double leftposition = odometerLeft.getCurrentPosition();
 
+        while (opModeIsActive() && Math.abs(auxposition) < targetTicks && Math.abs(leftposition) < targetTicks2)  {
+
+            YawPitchRollAngles robotorientation;
+            robotorientation = imu.getRobotYawPitchRollAngles();
+            double yaw = robotorientation.getYaw(AngleUnit.DEGREES);
+
+            leftposition = odometerLeft.getCurrentPosition();
             auxposition = odometerAux.getCurrentPosition();
-            telemetry.addData("Odometry Ticks", odometerAux.getCurrentPosition());
-            //  telemetry.addData("Odometry Ticks", odometerRight.getCurrentPosition());
-            // telemetry.addData("Odometry Ticks", odometerLeft.getCurrentPosition());
+            telemetry.addData("yawposition", yaw);
+            telemetry.addData("OdometerAux Ticks", odometerAux.getCurrentPosition());
+            telemetry.addData("Odometry Ticks", odometerLeft.getCurrentPosition());
             telemetry.addData("Target Ticks", targetTicks);
             telemetry.update();
             sleep(50);

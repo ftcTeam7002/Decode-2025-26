@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 // import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -76,7 +77,7 @@ public class OmniOpMode extends LinearOpMode {
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
     private DcMotorEx launcherLeft = null;
-    private Servo kicker = null;
+    private DcMotorEx intakeWheels = null;
 
     @Override
     public void runOpMode() {
@@ -88,7 +89,7 @@ public class OmniOpMode extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
-        kicker = hardwareMap.get(Servo.class, "kicker");
+        intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -104,6 +105,7 @@ public class OmniOpMode extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         launcherLeft.setDirection(DcMotorEx.Direction.FORWARD);
+        intakeWheels.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -150,15 +152,19 @@ public class OmniOpMode extends LinearOpMode {
             backRightDrive.setPower(backRightPower);
 
             // launcher
-            if (gamepad2.right_bumper) {
+            if (gamepad1.right_bumper) {
                 launcherLeft.setVelocity(2000);
             }
             else launcherLeft.setPower(0);
-            // kicker
-            if(gamepad2.b) {
-                kicker.setPosition(0.85);
+            if (gamepad1.left_bumper) {
+                launcherLeft.setDirection(DcMotorSimple.Direction.REVERSE);
             }
-            else kicker.setPosition(1);
+            else launcherLeft.setPower(0);
+            // intakeWheels
+            if(gamepad1.b) {
+                intakeWheels.setVelocity(1500);
+            }
+            else intakeWheels.setPower(0);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
