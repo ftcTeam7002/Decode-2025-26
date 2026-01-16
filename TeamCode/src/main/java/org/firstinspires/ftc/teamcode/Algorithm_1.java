@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -66,6 +67,7 @@ public class Algorithm_1 extends LinearOpMode {
     private DcMotor backRightDrive = null;
     private DcMotorEx launcherLeft = null;
     private DcMotorEx intakeWheels = null;
+    private Servo kicker = null;
     private ElapsedTime runtime = new ElapsedTime();
 
     static final double FORWARD_SPEED = 0.6;
@@ -80,6 +82,7 @@ public class Algorithm_1 extends LinearOpMode {
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
         intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
+        kicker = hardwareMap.get(Servo.class, "kicker");
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -87,7 +90,7 @@ public class Algorithm_1 extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
-
+        intakeWheels.setDirection(DcMotor.Direction.REVERSE);
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //
         telemetry.update();
@@ -108,6 +111,7 @@ public class Algorithm_1 extends LinearOpMode {
             telemetry.addData("Velocity", launcherLeft.getVelocity() + "   " + runtime.toString());
             telemetry.update();
             // reverse
+            kicker.setPosition(0);
             frontLeftDrive.setPower(REVERSE_SPEED);
             frontRightDrive.setPower(REVERSE_SPEED);
             backLeftDrive.setPower(REVERSE_SPEED);
@@ -118,20 +122,13 @@ public class Algorithm_1 extends LinearOpMode {
             backLeftDrive.setPower(0);
             backRightDrive.setPower(0);
             // launch
-            launcherLeft.setVelocity(1800);
+            sleep(200);
+            kicker.setPosition(0.15);
+            sleep(250);
+            launcherLeft.setVelocity(2500);
             sleep(2000);
-            intakeWheels.setVelocity(0.85);
-            sleep(500);
-            intakeWheels.setVelocity(1);
-            sleep(1500);
-            intakeWheels.setVelocity(0.85);
-            sleep(500);
-            intakeWheels.setVelocity(1);
-            sleep(1500);
-            intakeWheels.setVelocity(0.85);
-            sleep(1000);
-            intakeWheels.setVelocity(4);
-            launcherLeft.setPower(0);
+            intakeWheels.setVelocity(1000);
+            sleep( 1750);
 //             strafe
             frontLeftDrive.setPower(REVERSE_SPEED);
             frontRightDrive.setPower(FORWARD_SPEED);
@@ -139,6 +136,8 @@ public class Algorithm_1 extends LinearOpMode {
             backRightDrive.setPower(REVERSE_SPEED);
             sleep(900);
             // Step 2:  Stop
+            launcherLeft.setPower(0);
+            intakeWheels.setPower(0);
             frontLeftDrive.setPower(0);
             frontRightDrive.setPower(0);
             backLeftDrive.setPower(0);

@@ -72,12 +72,16 @@ public class OmniOpMode extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
+    private Servo kicker = null;
     private DcMotor frontLeftDrive = null;
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
     private DcMotorEx launcherLeft = null;
     private DcMotorEx intakeWheels = null;
+
+    static final double FORWARD_SPEED = 0.6;
+    static final double REVERSE_SPEED = -0.6;
 
     @Override
     public void runOpMode() {
@@ -90,6 +94,9 @@ public class OmniOpMode extends LinearOpMode {
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
         intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
+        kicker = hardwareMap.get(Servo.class, "kicker");
+
+
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -105,8 +112,9 @@ public class OmniOpMode extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         launcherLeft.setDirection(DcMotorEx.Direction.FORWARD);
+        launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeWheels.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        kicker.setDirection(Servo.Direction.FORWARD);
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -119,17 +127,17 @@ public class OmniOpMode extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral =  gamepad1.left_stick_x;
-            double yaw     =  gamepad1.right_stick_x;
+            double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            double lateral = gamepad1.left_stick_x;
+            double yaw = gamepad1.right_stick_x;
 
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-            double frontLeftPower  = axial + lateral + yaw;
+            double frontLeftPower = axial + lateral + yaw;
             double frontRightPower = axial - lateral - yaw;
-            double backLeftPower   = axial - lateral + yaw;
-            double backRightPower  = axial + lateral - yaw;
+            double backLeftPower = axial - lateral + yaw;
+            double backRightPower = axial + lateral - yaw;
 
             // Normalize the values so no wheel power exceeds 100%
             // This ensures that the robot maintains the desired motion.
@@ -138,10 +146,10 @@ public class OmniOpMode extends LinearOpMode {
             max = Math.max(max, Math.abs(backRightPower));
 
             if (max > 1.0) {
-                frontLeftPower  /= max;
+                frontLeftPower /= max;
                 frontRightPower /= max;
-                backLeftPower   /= max;
-                backRightPower  /= max;
+                backLeftPower /= max;
+                backRightPower /= max;
             }
 
 
@@ -151,15 +159,36 @@ public class OmniOpMode extends LinearOpMode {
             backLeftDrive.setPower(backLeftPower);
             backRightDrive.setPower(backRightPower);
 
+            // kicker
+            if (gamepad1.a) {
+                frontLeftDrive.setPower(REVERSE_SPEED);
+                frontRightDrive.setPower(REVERSE_SPEED);
+                backLeftDrive.setPower(REVERSE_SPEED);
+                backRightDrive.setPower(REVERSE_SPEED);
+                sleep(290);
+                frontLeftDrive.setPower(0);
+                frontRightDrive.setPower(0);
+                backLeftDrive.setPower(0);
+                backRightDrive.setPower(0);
+                sleep(200);
+                kicker.setPosition(0.15);
+                sleep(250);
+                launcherLeft.setVelocity(2500);
+                sleep(2000);
+                intakeWheels.setVelocity(1000);
+                sleep( 1750);
+            }
+            else kicker.setPosition(0);
             // launcher
             if (gamepad1.right_bumper) {
-                launcherLeft.setVelocity(2000);
+                launcherLeft.setVelocity(2500);
             }
             else launcherLeft.setPower(0);
             if (gamepad1.left_bumper) {
-                launcherLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+                intakeWheels.setDirection(DcMotor.Direction.REVERSE);
+                intakeWheels.setVelocity(1500);
             }
-            else launcherLeft.setPower(0);
+            else intakeWheels.setPower(0);
             // intakeWheels
             if(gamepad1.b) {
                 intakeWheels.setVelocity(1500);
@@ -167,6 +196,7 @@ public class OmniOpMode extends LinearOpMode {
             else intakeWheels.setPower(0);
 
             // Show the elapsed game time and wheel power.
+            telemetry.addData( "LL Velocity", launcherLeft.getVelocity());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);

@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -20,10 +21,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
         private DcMotor frontRightDrive;
         private DcMotor backLeftDrive;
         private DcMotor backRightDrive;
-
         public DcMotor odometerLeft;
         public DcMotor odometerAux;
 
+        private DcMotorEx intakeWheels;
         private DcMotorEx launcherLeft;
         private Servo kicker;
 
@@ -47,10 +48,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
             frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
             backLeftDrive   = hardwareMap.get(DcMotor.class, "BL");
             backRightDrive  = hardwareMap.get(DcMotor.class, "BR");
-
+            intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
+            kicker = hardwareMap.get(Servo.class, "kicker");
+            launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
             odometerLeft = backLeftDrive;
             odometerAux  = frontRightDrive;
 
+            intakeWheels.setDirection(DcMotor.Direction.REVERSE);
             frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -63,38 +67,53 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
             imu.resetYaw();
 
-            // -------------------------
-            // MOVE #1 — 2 inches
-            // -------------------------
-            driveToTicks((int)(2 * TICKS_PER_INCH));
 
-            // -------------------------
-            // MOVE #2 — 4 inches
-            // -------------------------
-            driveToTicks((int)(4 * TICKS_PER_INCH));
+            driveToTicks((int)(8 * TICKS_PER_INCH));
+
+          //  driveToTicks((int)(10 * TICKS_PER_INCH));
 
             telemetry.addLine("COMPLETE");
             telemetry.update();
             sleep(1000);
         }
 
-        // ==========================================================
-        // Drives forward until odometry reaches target ticks
-        // ==========================================================
+
         private void driveToTicks(int targetTicks) {
 
             // Reset odometry encoders
             odometerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             odometerAux.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
             odometerLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             odometerAux.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             // drive
-            frontLeftDrive.setPower(FORWARD_SPEED);
+           frontLeftDrive.setPower(FORWARD_SPEED);
             frontRightDrive.setPower(-FORWARD_SPEED);
             backLeftDrive.setPower(FORWARD_SPEED);
             backRightDrive.setPower(-FORWARD_SPEED);
+            sleep(290);
+            frontLeftDrive.setPower(0);
+            frontRightDrive.setPower(0);
+            backLeftDrive.setPower(0);
+            backRightDrive.setPower(0);
+            // launch
+            kicker.setPosition(0.15);
+            sleep(250);
+            launcherLeft.setVelocity(2500);
+            sleep(2000);
+            intakeWheels.setVelocity(1500);
+            sleep( 1750);
+            // strafe
+            launcherLeft.setPower(0);
+            frontLeftDrive.setPower(FORWARD_SPEED);
+            frontRightDrive.setPower(-FORWARD_SPEED);
+            backLeftDrive.setPower(-FORWARD_SPEED);
+            backRightDrive.setPower(FORWARD_SPEED);
+
+
+
+
+
 
 
 
@@ -114,12 +133,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
                 telemetry.update();
             }
 
-            // Stop motors
             frontLeftDrive.setPower(0);
             frontRightDrive.setPower(0);
             backLeftDrive.setPower(0);
             backRightDrive.setPower(0);
 
-            sleep(200); // settle time
+            sleep(200);
         }
     }
