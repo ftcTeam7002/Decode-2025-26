@@ -116,25 +116,47 @@ public class Algorithm_1 extends LinearOpMode {
             frontRightDrive.setPower(REVERSE_SPEED);
             backLeftDrive.setPower(REVERSE_SPEED);
             backRightDrive.setPower(REVERSE_SPEED);
-            sleep(290);
+            sleep(310);
             frontLeftDrive.setPower(0);
             frontRightDrive.setPower(0);
             backLeftDrive.setPower(0);
             backRightDrive.setPower(0);
             // launch
             sleep(200);
-            kicker.setPosition(0.15);
+            kicker.setPosition(0.2);
             sleep(250);
             launcherLeft.setVelocity(2500);
-            sleep(2000);
-            intakeWheels.setVelocity(1000);
-            sleep( 1750);
-//             strafe
-            frontLeftDrive.setPower(REVERSE_SPEED);
-            frontRightDrive.setPower(FORWARD_SPEED);
-            backLeftDrive.setPower(FORWARD_SPEED);
-            backRightDrive.setPower(REVERSE_SPEED);
+            sleep(2500);
+            intakeWheels.setVelocity(1500);
+            sleep( 500);
+            intakeWheels.setVelocity(0);
             sleep(900);
+            intakeWheels.setVelocity(1500);
+            sleep( 500);
+            intakeWheels.setVelocity(0);
+            sleep(900);
+            intakeWheels.setVelocity(1500);
+            sleep( 500);
+            intakeWheels.setVelocity(0);
+            sleep(50);
+            frontLeftDrive.setPower(REVERSE_SPEED);
+            frontRightDrive.setPower(REVERSE_SPEED);
+            backLeftDrive.setPower(REVERSE_SPEED);
+            backRightDrive.setPower(REVERSE_SPEED);
+            sleep(150);
+//            rotate
+            frontRightDrive.setPower(REVERSE_SPEED);
+            frontLeftDrive.setPower(FORWARD_SPEED);
+            backRightDrive.setPower(REVERSE_SPEED);
+            backLeftDrive.setPower(FORWARD_SPEED);
+            sleep(850);
+
+            // strafe
+            frontLeftDrive.setPower(FORWARD_SPEED);
+            frontRightDrive.setPower(REVERSE_SPEED);
+            backLeftDrive.setPower(REVERSE_SPEED);
+            backRightDrive.setPower(FORWARD_SPEED);
+            sleep(1250);
             // Step 2:  Stop
             launcherLeft.setPower(0);
             intakeWheels.setPower(0);

@@ -28,129 +28,123 @@
  */
 
 package org.firstinspires.ftc.teamcode;
-
-import android.media.tv.TvContract;
-
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-/*
- * This OpMode illustrates the concept of driving a path based on time.
- * The code is structured as a LinearOpMode
- *
- * The code assumes that you do NOT have encoders on the wheels,
- *   otherwise you would use: RobotAutoDriveByEncoder;
- *
- *   The desired path in this example is:
- *   - Drive forward for 3 seconds
- *   - Spin right for 1.3 seconds
- *   - Drive Backward for 1 Second
- *
- *  The code is written in a simple form with no optimizations.
- *  However, there are several ways that this type of sequence could be streamlined,
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name="algorithm 2 :3", group="Robot")
-
+@Autonomous(name = "Odo test2", group = "Robot")
 public class Algorithm_2 extends LinearOpMode {
 
-    /* Declare OpMode members. */
-    private DcMotor frontLeftDrive = null;
-    private DcMotor frontRightDrive = null;
-    private DcMotor backLeftDrive = null;
-    private DcMotor backRightDrive = null;
-    private DcMotorEx launcherLeft = null;
-    private Servo kicker = null;
-    private ElapsedTime runtime = new ElapsedTime();
+    private IMU imu;
+
+    private DcMotor frontLeftDrive;
+    private DcMotor frontRightDrive;
+    private DcMotor backLeftDrive;
+    private DcMotor backRightDrive;
+    public DcMotor odometerLeft;
+    public DcMotor odometerAux;
+
+    private DcMotorEx intakeWheels;
+    private DcMotorEx launcherLeft;
+    private Servo kicker;
 
     static final double FORWARD_SPEED = 0.6;
-    static final double REVERSE_SPEED = -0.6;
+
+    // Your odometry constant
+    public static final double TICKS_PER_INCH = 1058.34;
+
     @Override
     public void runOpMode() {
 
-        // Initialize the drive system variables.
-        frontLeftDrive = hardwareMap.get(DcMotor.class, "FL");
-        frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
-        backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
-        backRightDrive = hardwareMap.get(DcMotor.class, "BR");
-        launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
-        kicker = hardwareMap.get(Servo.class, "kicker");
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot orientationOnRobot =
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+                        RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+                );
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
-        // Send telemetry message to signify robot waiting;
-        telemetry.addData("Status", "Ready to run");    //
+        frontLeftDrive  = hardwareMap.get(DcMotor.class, "FL");
+        frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
+        backLeftDrive   = hardwareMap.get(DcMotor.class, "BL");
+        backRightDrive  = hardwareMap.get(DcMotor.class, "BR");
+        intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
+        kicker = hardwareMap.get(Servo.class, "kicker");
+        launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
+        odometerLeft = backLeftDrive;
+        odometerAux  = frontRightDrive;
+
+        intakeWheels.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        telemetry.addLine("Initialized — waiting for start");
         telemetry.update();
 
-        // Wait for the game to start (driver presses START)
         waitForStart();
 
+        imu.resetYaw();
 
-        // Launch and Reverse  left= forward for reverse
-        launcherLeft.setDirection(DcMotor.Direction.FORWARD);
 
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 5.0)) {
-            telemetry.addData("Velocity", launcherLeft.getVelocity());
-            telemetry.setMsTransmissionInterval(250);
+        driveToTicks((int)(15 * TICKS_PER_INCH));
+
+
+
+        telemetry.addLine("COMPLETE");
+        telemetry.update();
+        sleep(1000);
+    }
+
+
+    private void driveToTicks(int targetTicks) {
+
+        // Reset odometry encoders
+        odometerLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        odometerAux.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        odometerLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        odometerAux.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // drive
+        frontLeftDrive.setPower(FORWARD_SPEED);
+        frontRightDrive.setPower(FORWARD_SPEED);
+        backLeftDrive.setPower(FORWARD_SPEED);
+        backRightDrive.setPower(FORWARD_SPEED);
+        sleep(700);
+        frontLeftDrive.setPower(0);
+        frontRightDrive.setPower(0);
+        backLeftDrive.setPower(0);
+        backRightDrive.setPower(0);
+
+        while (opModeIsActive()
+                && Math.abs(odometerLeft.getCurrentPosition()) < targetTicks
+                && Math.abs(odometerAux.getCurrentPosition()) < targetTicks) {
+
+            YawPitchRollAngles angles = imu.getRobotYawPitchRollAngles();
+            double yaw = angles.getYaw(AngleUnit.DEGREES);
+
+            telemetry.addData("Yaw", yaw);
+            telemetry.addData("Left Odo", odometerLeft.getCurrentPosition());
+            telemetry.addData("Aux Odo", odometerAux.getCurrentPosition());
+            telemetry.addData("Target", targetTicks);
             telemetry.update();
-
-            telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-            telemetry.addData("Velocity", launcherLeft.getVelocity() + "   " + runtime.toString());
-            telemetry.update();
-            // reverse
-            frontLeftDrive.setPower(REVERSE_SPEED);
-            frontRightDrive.setPower(REVERSE_SPEED);
-            backLeftDrive.setPower(REVERSE_SPEED);
-            backRightDrive.setPower(REVERSE_SPEED);
-            sleep(290);
-            frontLeftDrive.setPower(0);
-            frontRightDrive.setPower(0);
-            backLeftDrive.setPower(0);
-            backRightDrive.setPower(0);
-            // launch
-            launcherLeft.setVelocity(1800);
-            sleep(2000);
-            kicker.setPosition(0.85);
-            sleep(500);
-            kicker.setPosition(1);
-            sleep(1500);
-            kicker.setPosition(0.85);
-            sleep(500);
-            kicker.setPosition(1);
-            sleep(1500);
-            kicker.setPosition(0.85);
-            sleep(1000);
-            kicker.setPosition(1);
-            launcherLeft.setPower(0);
-//             strafe
-            frontLeftDrive.setPower(REVERSE_SPEED);
-            frontRightDrive.setPower(FORWARD_SPEED);
-            backLeftDrive.setPower(FORWARD_SPEED);
-            backRightDrive.setPower(REVERSE_SPEED);
-            sleep(900);
-            // Step 2:  Stop
-            frontLeftDrive.setPower(0);
-            frontRightDrive.setPower(0);
-            backLeftDrive.setPower(0);
-            backRightDrive.setPower(0);
-
-            telemetry.addData("Path", "Complete");
-            telemetry.update();
-            sleep(1000);
         }
+
+        frontLeftDrive.setPower(0);
+        frontRightDrive.setPower(0);
+        backLeftDrive.setPower(0);
+        backRightDrive.setPower(0);
+
+        sleep(200);
     }
 }
