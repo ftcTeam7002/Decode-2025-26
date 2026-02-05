@@ -116,15 +116,15 @@ public class Algorithm_2 extends LinearOpMode {
         odometerAux.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // drive
-        frontLeftDrive.setPower(FORWARD_SPEED);
-        frontRightDrive.setPower(FORWARD_SPEED);
-        backLeftDrive.setPower(FORWARD_SPEED);
-        backRightDrive.setPower(FORWARD_SPEED);
-        sleep(700);
-        frontLeftDrive.setPower(0);
-        frontRightDrive.setPower(0);
-        backLeftDrive.setPower(0);
-        backRightDrive.setPower(0);
+//        frontLeftDrive.setPower(FORWARD_SPEED);
+//        frontRightDrive.setPower(FORWARD_SPEED);
+//        backLeftDrive.setPower(FORWARD_SPEED);
+//        backRightDrive.setPower(FORWARD_SPEED);
+//        sleep(700);
+//        frontLeftDrive.setPower(0);
+//        frontRightDrive.setPower(0);
+//        backLeftDrive.setPower(0);
+//        backRightDrive.setPower(0);
 
         while (opModeIsActive()
                 && Math.abs(odometerLeft.getCurrentPosition()) < targetTicks
