@@ -52,6 +52,7 @@ public class Algorithm_2 extends LinearOpMode {
     private DcMotor backRightDrive;
     public DcMotor odometerLeft;
     public DcMotor odometerAux;
+    public DcMotor odometerRight;
 
     private DcMotorEx intakeWheels;
     private DcMotorEx launcherLeft;
@@ -80,8 +81,15 @@ public class Algorithm_2 extends LinearOpMode {
         intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
         kicker = hardwareMap.get(Servo.class, "kicker");
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
-        odometerLeft = backLeftDrive;
+        odometerRight = backRightDrive;
+        odometerLeft = frontLeftDrive;
         odometerAux  = frontRightDrive;
+
+        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        backLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+
 
         intakeWheels.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -97,7 +105,7 @@ public class Algorithm_2 extends LinearOpMode {
         imu.resetYaw();
 
 
-        driveToTicks((int)(15 * TICKS_PER_INCH));
+        driveToTicks((int)(99999 * TICKS_PER_INCH));
 
 
 
@@ -114,21 +122,13 @@ public class Algorithm_2 extends LinearOpMode {
         odometerAux.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         odometerLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         odometerAux.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // drive
-//        frontLeftDrive.setPower(FORWARD_SPEED);
-//        frontRightDrive.setPower(FORWARD_SPEED);
-//        backLeftDrive.setPower(FORWARD_SPEED);
-//        backRightDrive.setPower(FORWARD_SPEED);
-//        sleep(700);
-//        frontLeftDrive.setPower(0);
-//        frontRightDrive.setPower(0);
-//        backLeftDrive.setPower(0);
-//        backRightDrive.setPower(0);
+        odometerRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        odometerRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         while (opModeIsActive()
                 && Math.abs(odometerLeft.getCurrentPosition()) < targetTicks
-                && Math.abs(odometerAux.getCurrentPosition()) < targetTicks) {
+                && Math.abs(odometerAux.getCurrentPosition()) < targetTicks
+                && Math.abs(odometerRight.getCurrentPosition()) < targetTicks){
 
             YawPitchRollAngles angles = imu.getRobotYawPitchRollAngles();
             double yaw = angles.getYaw(AngleUnit.DEGREES);
@@ -136,6 +136,7 @@ public class Algorithm_2 extends LinearOpMode {
             telemetry.addData("Yaw", yaw);
             telemetry.addData("Left Odo", odometerLeft.getCurrentPosition());
             telemetry.addData("Aux Odo", odometerAux.getCurrentPosition());
+            telemetry.addData("Right Odo", odometerRight.getCurrentPosition());
             telemetry.addData("Target", targetTicks);
             telemetry.update();
         }
@@ -147,4 +148,16 @@ public class Algorithm_2 extends LinearOpMode {
 
         sleep(200);
     }
+
+    private void resetEncoders() {
+        frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
 }
