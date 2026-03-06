@@ -6,13 +6,16 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class pidfLauncher extends OpMode {
 
+    private DcMotorEx intakeWheels;
     private DcMotorEx launcherLeft;
+    private Servo kicker;
 
-    public double highVelocity = 1920;
+    public double highVelocity = 1700;
     public double lowVelocity = 1000;
     public double curVelocityTarget = highVelocity;
 

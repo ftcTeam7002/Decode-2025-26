@@ -1,0 +1,42 @@
+launch sequence case
+
+run flywheel for x seconds
+lower kicker for x seconds
+run pulley to launch the artifacts.
+
+another concept
+
+if current velocity = target velocity {
+run flywheel until target velocity
+}
+
+lower kicker for x seconds
+/*run pulley to launch the one artifact
+wait until the flywheel is maximum speed */ x how many times to launch all artifacts
+
+
+wait until follower
+flywheel set velocity
+wait until velocity
+lower kicker
+run intake wheels
+wait until launched
+stop motors
+set path state
+
+
+
+
+
+
+
+intake plans
+
+
+
+
+
+
+
+
+
