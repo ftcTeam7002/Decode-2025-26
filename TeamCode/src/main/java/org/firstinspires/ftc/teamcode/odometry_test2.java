@@ -69,7 +69,7 @@ public class odometry_test2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         // -------------------- AUTO SEQUENCE --------------------
-        driveForwardEncoder((int)(5 * TICKS_PER_INCH), FORWARD_SPEED);
+//        driveForwardEncoder((int)(5 * TICKS_PER_INCH), FORWARD_SPEED);
         launch();
 
         telemetry.addLine("AUTO COMPLETE");
