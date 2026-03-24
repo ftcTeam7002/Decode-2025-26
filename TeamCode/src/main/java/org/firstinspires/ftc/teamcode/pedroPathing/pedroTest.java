@@ -32,14 +32,14 @@ public class pedroTest extends OpMode {
     ElapsedTime runTime = new ElapsedTime();
     double startTime;
 
-    private final Pose startPose = new Pose(20.8, 122, Math.toRadians(135)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(28.8, 114, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose pickup1Pose = new Pose(46, 84, Math.toRadians(0));// Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose startPose = new Pose(15.7, 121.4, Math.toRadians(135)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(26, 117, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose pickup1Pose = new Pose(46, 85, Math.toRadians(0));// Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup2Pose = new Pose(46, 60, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
     private final Pose pickup3Pose = new Pose(46, 38, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.
-    private final Pose intake1Pose = new Pose (24,84,Math.toRadians(0));
-    private final Pose intake2Pose = new Pose (24,60,Math.toRadians(0));
-    private final Pose intake3Pose = new Pose (22, 38,Math.toRadians(0));
+    private final Pose intake1Pose = new Pose (24,85,Math.toRadians(0));
+    private final Pose intake2Pose = new Pose (22,60,Math.toRadians(0));
+    private final Pose intake3Pose = new Pose (24, 38,Math.toRadians(0));
     private final Pose endPose = new Pose (23, 95, Math.toRadians(0));
 
 
@@ -63,7 +63,7 @@ public class pedroTest extends OpMode {
 
         /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup1Pose, scorePose))
+                .addPath(new BezierLine(intake1Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
                 .build();
 
@@ -75,7 +75,7 @@ public class pedroTest extends OpMode {
 
         /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, scorePose))
+                .addPath(new BezierLine(intake2Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
                 .build();
 
@@ -87,7 +87,7 @@ public class pedroTest extends OpMode {
 
         /* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
+                .addPath(new BezierLine(intake3Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
                 .build();
 
@@ -140,7 +140,7 @@ public class pedroTest extends OpMode {
             case 2:
 
                 if (!follower.isBusy()) {
-                    intakeWheels.setVelocity(1000);
+                    intakeWheels.setPower(1);
                     follower.followPath(intakePickup1, 0.35, true);
                     setPathState(3);
                 }
@@ -148,7 +148,7 @@ public class pedroTest extends OpMode {
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
                 if (!follower.isBusy()) {
-                    /* Grab Sample */
+                    intakeWheels.setPower(0);
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(scorePickup1, true);
@@ -168,8 +168,7 @@ public class pedroTest extends OpMode {
 
             case 5:
                 if (!follower.isBusy()) {
-                    intakeWheels.setVelocity(1000);
-
+                    intakeWheels.setPower(1);
                     follower.followPath(intakePickup2, 0.35, true);
                     setPathState(6);
                 }
@@ -179,7 +178,7 @@ public class pedroTest extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if (!follower.isBusy()) {
                     /* Grab Sample */
-
+                    intakeWheels.setVelocity(0);
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(scorePickup2, true);
                     launch(7);
@@ -198,7 +197,7 @@ public class pedroTest extends OpMode {
 
             case 8:
                 if (!follower.isBusy()){
-                    intakeWheels.setVelocity(1000);
+                    intakeWheels.setPower(1);
                     follower.followPath(intakePickup3);
                     setPathState(9);
                 }
@@ -207,7 +206,7 @@ public class pedroTest extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
                 if (!follower.isBusy()) {
                     /* Grab Sample */
-
+                    intakeWheels.setVelocity(0);
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(scorePickup3, true);
                     launch(10);
@@ -218,14 +217,19 @@ public class pedroTest extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(endChain);
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
+                    setPathState(-123456789);
                 }
                 break;
 
+                // -----------OTHER------------------
+
+
             case -10:
-                launcherLeft.setVelocity(targetVelocity);
-                startTime = runTime.seconds();
-                setPathState(-20);
+                if (!follower.isBusy()) {
+                    launcherLeft.setVelocity(targetVelocity);
+                    startTime = runTime.seconds();
+                    setPathState(-20);
+                }
                 break;
             case -20:
 
@@ -240,9 +244,8 @@ public class pedroTest extends OpMode {
                 break;
 
             case -30:
-
                 kicker.setPosition(0.2);
-                intakeWheels.setVelocity(1000);
+                intakeWheels.setVelocity(targetVelocity);
                 startTime = runTime.seconds();
                 setPathState(-40);
 
@@ -312,9 +315,6 @@ public class pedroTest extends OpMode {
         launcherLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(16.5, 0, 0, 17.7);
         launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-
-        intakeWheels.setDirection(DcMotor.Direction.REVERSE);
-
 
 
         pathTimer = new Timer();

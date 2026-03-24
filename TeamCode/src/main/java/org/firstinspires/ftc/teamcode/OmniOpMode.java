@@ -199,7 +199,7 @@ public class OmniOpMode extends LinearOpMode {
             else kicker.setPosition(0);
             // launcher
             if (gamepad1.right_bumper) {
-                launcherLeft.setVelocity(2500);
+                launcherLeft.setVelocity(1950);
             }
             else launcherLeft.setPower(0);
             if (gamepad1.y) {
