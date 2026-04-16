@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "PedroAuto", group = "Examples")
+@Autonomous(name = "no", group = "Examples")
 public class pedroAuto extends OpMode {
 
 

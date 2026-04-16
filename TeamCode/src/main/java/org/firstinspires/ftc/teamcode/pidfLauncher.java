@@ -19,8 +19,8 @@ public class pidfLauncher extends OpMode {
     public double lowVelocity = 1000;
     public double curVelocityTarget = highVelocity;
 
-    double P = 16.5;
-    double F = 17.7;
+    double P = 0;
+    double F = 0;
 
     double[] stepSizes = {10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
 

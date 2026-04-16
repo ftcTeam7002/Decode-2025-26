@@ -81,8 +81,11 @@ public class OmniOpMode extends LinearOpMode {
     private DcMotorEx intakeWheels = null;
     public DcMotor odometerAux;
     public DcMotor odometerRight;
+    double targetPosition = 0.18;
+
     static final double FORWARD_SPEED = 0.6;
     static final double REVERSE_SPEED = -0.6;
+
 
     @Override
     public void runOpMode() {
@@ -124,14 +127,21 @@ public class OmniOpMode extends LinearOpMode {
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+
         launcherLeft.setDirection(DcMotorEx.Direction.FORWARD);
         launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         kicker.setDirection(Servo.Direction.FORWARD);
+
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -176,47 +186,26 @@ public class OmniOpMode extends LinearOpMode {
             backLeftDrive.setPower(backLeftPower);
             backRightDrive.setPower(backRightPower);
 
-            // kicker
-            if (gamepad1.a) {
-                frontLeftDrive.setPower(REVERSE_SPEED);
-                frontRightDrive.setPower(REVERSE_SPEED);
-                backLeftDrive.setPower(REVERSE_SPEED);
-                backRightDrive.setPower(REVERSE_SPEED);
-                sleep(290);
-                frontLeftDrive.setPower(0);
-                frontRightDrive.setPower(0);
-                backLeftDrive.setPower(0);
-                backRightDrive.setPower(0);
-                sleep(200);
-                kicker.setPosition(0.2);
-                sleep(125);
-                launcherLeft.setVelocity(2500);
-                sleep(2500);
-                intakeWheels.setVelocity(1250);
-                sleep(2000);
-
-            }
-            else kicker.setPosition(0);
             // launcher
             if (gamepad1.right_bumper) {
                 launcherLeft.setVelocity(1950);
             }
             else launcherLeft.setPower(0);
             if (gamepad1.y) {
-                kicker.setPosition(0.2);
+                kicker.setPosition(0.42);
             }
-            else kicker.setPosition(0);
+            else kicker.setPosition(0.18);
 
-            if (gamepad1.x) {
-                intakeWheels.setVelocity(-1500);
 
-            }
-            else intakeWheels.setPower(0);
             // intakeWheels
             if(gamepad1.b) {
-                intakeWheels.setVelocity(1500);
+                intakeWheels.setVelocity(750);
             }
             else intakeWheels.setPower(0);
+
+            if (gamepad1.x) {
+                intakeWheels.setPower(-1500);
+            } else intakeWheels.setPower(0);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Aux Odo", odometerAux.getCurrentPosition());

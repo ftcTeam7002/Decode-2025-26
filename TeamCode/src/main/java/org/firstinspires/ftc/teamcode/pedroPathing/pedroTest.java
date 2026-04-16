@@ -24,7 +24,9 @@ public class pedroTest extends OpMode {
     private DcMotorEx launcherLeft;
     private Servo kicker;
     private DcMotorEx intakeWheels;
-    public double targetVelocity = 1700;
+    public double targetVelocity = 1650;
+    public double targetPosition = 0.18;
+    public double currentPosition = kicker.getPosition();
     private int pathState;
     public double currentVelocity;
 
@@ -32,12 +34,12 @@ public class pedroTest extends OpMode {
     ElapsedTime runTime = new ElapsedTime();
     double startTime;
 
-    private final Pose startPose = new Pose(15.7, 121.4, Math.toRadians(135)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(15.7,  121.4, Math.toRadians(135)); // Start Pose of our robot.
     private final Pose scorePose = new Pose(26, 117, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose pickup1Pose = new Pose(46, 85, Math.toRadians(0));// Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose pickup1Pose = new Pose(46, 85, Math.toRadians(-10));// Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup2Pose = new Pose(46, 60, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
     private final Pose pickup3Pose = new Pose(46, 38, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.
-    private final Pose intake1Pose = new Pose (24,85,Math.toRadians(0));
+    private final Pose intake1Pose = new Pose (12,84,Math.toRadians(-10));
     private final Pose intake2Pose = new Pose (22,60,Math.toRadians(0));
     private final Pose intake3Pose = new Pose (24, 38,Math.toRadians(0));
     private final Pose endPose = new Pose (23, 95, Math.toRadians(0));
@@ -140,9 +142,11 @@ public class pedroTest extends OpMode {
             case 2:
 
                 if (!follower.isBusy()) {
-                    intakeWheels.setPower(1);
+                    if (kicker.getPosition() > targetPosition + 0.02){
+                        intakeWheels.setPower(0);
+                        setPathState(3);
+                    } else intakeWheels.setVelocity(1500);
                     follower.followPath(intakePickup1, 0.35, true);
-                    setPathState(3);
                 }
                 break;
             case 3:
@@ -168,7 +172,7 @@ public class pedroTest extends OpMode {
 
             case 5:
                 if (!follower.isBusy()) {
-                    intakeWheels.setPower(1);
+                    intakeWheels.setVelocity(1000);
                     follower.followPath(intakePickup2, 0.35, true);
                     setPathState(6);
                 }
@@ -221,7 +225,7 @@ public class pedroTest extends OpMode {
                 }
                 break;
 
-                // -----------OTHER------------------
+                // -----------LAUNCHING MECHANISM------------------
 
 
             case -10:
@@ -234,7 +238,7 @@ public class pedroTest extends OpMode {
             case -20:
 
                 if (runTime.seconds() >= startTime+0.5) {
-                    if (launcherLeft.getVelocity() > targetVelocity - 20){
+                    if (launcherLeft.getVelocity() > targetVelocity - 60){
                         setPathState(-30);
                     }
                     startTime = runTime.seconds();
@@ -244,7 +248,7 @@ public class pedroTest extends OpMode {
                 break;
 
             case -30:
-                kicker.setPosition(0.2);
+                kicker.setPosition(0.42);
                 intakeWheels.setVelocity(targetVelocity);
                 startTime = runTime.seconds();
                 setPathState(-40);
@@ -260,6 +264,7 @@ public class pedroTest extends OpMode {
 
         }
     }
+    //-----------------------------------------------------------
     int nextPathStateVar;
     public void launch(int nextPathState) {
         nextPathStateVar = nextPathState;
@@ -267,7 +272,7 @@ public class pedroTest extends OpMode {
     }
 
     private void stopMotors() {
-        kicker.setPosition(0);
+        kicker.setPosition(0.18);
         launcherLeft.setVelocity(0);
         intakeWheels.setVelocity(0);
     }
@@ -293,6 +298,7 @@ public class pedroTest extends OpMode {
         autonomousPathUpdate();
 
         // Feedback to Driver Hub for debugging
+        telemetry.addData("kicker pos", kicker.getPosition());
         telemetry.addData("Target Velocity", targetVelocity);
         telemetry.addData("Current Velocity", "%.2f", currentVelocity);
         telemetry.addData("path state", pathState);
@@ -313,7 +319,7 @@ public class pedroTest extends OpMode {
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
         launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcherLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(16.5, 0, 0, 17.7);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(55, 0, 0, 15.6);
         launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
 
