@@ -36,8 +36,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 // import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.onbotjava.handlers.objbuild.LaunchBuild;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -73,11 +76,13 @@ public class OmniOpMode extends LinearOpMode {
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private Servo kicker = null;
+
     private DcMotor frontLeftDrive = null;
     private DcMotor backLeftDrive = null;
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
     private DcMotorEx launcherLeft = null;
+    private DcMotorEx launcherRight = null;
     private DcMotorEx intakeWheels = null;
     public DcMotor odometerAux;
     public DcMotor odometerRight;
@@ -97,9 +102,12 @@ public class OmniOpMode extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
         backRightDrive = hardwareMap.get(DcMotor.class, "BR");
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
+        launcherRight = hardwareMap.get(DcMotorEx.class, "LR");
         intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
         kicker = hardwareMap.get(Servo.class, "kicker");
-
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(18.5, 0, 0, 19);
+        launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        launcherRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -137,8 +145,10 @@ public class OmniOpMode extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        launcherLeft.setDirection(DcMotorEx.Direction.FORWARD);
+        launcherLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        launcherRight.setDirection(DcMotorSimple.Direction.FORWARD);
         launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeWheels.setDirection(DcMotorSimple.Direction.REVERSE);
         kicker.setDirection(Servo.Direction.FORWARD);
 
@@ -188,11 +198,14 @@ public class OmniOpMode extends LinearOpMode {
 
             // launcher
             if (gamepad1.right_bumper) {
-                launcherLeft.setVelocity(1950);
+                launcherLeft.setVelocity(2100);
+                launcherRight.setVelocity(2100);
             }
-            else launcherLeft.setPower(0);
+            else launcherRight.setVelocity(0);
+            launcherLeft.setVelocity(0);
+
             if (gamepad1.y) {
-                kicker.setPosition(0.42);
+                kicker.setPosition(0.35);
             }
             else kicker.setPosition(0.18);
 
@@ -206,6 +219,7 @@ public class OmniOpMode extends LinearOpMode {
             if (gamepad1.x) {
                 intakeWheels.setPower(-1500);
             } else intakeWheels.setPower(0);
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Aux Odo", odometerAux.getCurrentPosition());

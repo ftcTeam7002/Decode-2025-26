@@ -24,9 +24,8 @@ public class pedroTest extends OpMode {
     private DcMotorEx launcherLeft;
     private Servo kicker;
     private DcMotorEx intakeWheels;
-    public double targetVelocity = 1650;
+    public double targetVelocity = 2100;
     public double targetPosition = 0.18;
-    public double currentPosition = kicker.getPosition();
     private int pathState;
     public double currentVelocity;
 
@@ -238,21 +237,21 @@ public class pedroTest extends OpMode {
             case -20:
 
                 if (runTime.seconds() >= startTime+0.5) {
-                    if (launcherLeft.getVelocity() > targetVelocity - 60){
+                    if (launcherLeft.getVelocity() > targetVelocity - 20) {
+                        startTime = runTime.seconds();
                         setPathState(-30);
                     }
-                    startTime = runTime.seconds();
-
                 }
 
                 break;
 
             case -30:
                 kicker.setPosition(0.42);
-                intakeWheels.setVelocity(targetVelocity);
-                startTime = runTime.seconds();
-                setPathState(-40);
-
+                if (runTime.seconds() >= startTime + 1) {
+                    intakeWheels.setVelocity(targetVelocity);
+                    startTime = runTime.seconds();
+                    setPathState(-40);
+                }
                 break;
 
             case -40:
@@ -319,7 +318,7 @@ public class pedroTest extends OpMode {
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
         launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcherLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(55, 0, 0, 15.6);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(18.5, 0, 0, 19);
         launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
 

@@ -11,12 +11,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class pidfLauncher extends OpMode {
 
-    private DcMotorEx intakeWheels;
     private DcMotorEx launcherLeft;
-    private Servo kicker;
-
-    public double highVelocity = 1700;
-    public double lowVelocity = 1000;
+    public double highVelocity = 2100;
+    public double lowVelocity = 100;
     public double curVelocityTarget = highVelocity;
 
     double P = 0;
@@ -39,6 +36,8 @@ public class pidfLauncher extends OpMode {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
+
+
 
     public void loop() {
         if (gamepad1.yWasPressed()) {
