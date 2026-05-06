@@ -6,14 +6,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class pidfLauncher extends OpMode {
 
     private DcMotorEx launcherLeft;
-    public double highVelocity = 2100;
-    public double lowVelocity = 100;
+    private DcMotorEx launcherRight;
+    public double highVelocity = 1900;
+    public double lowVelocity = 550;
     public double curVelocityTarget = highVelocity;
 
     double P = 0;
@@ -31,9 +31,13 @@ public class pidfLauncher extends OpMode {
     public void init() {
 
         launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
+        launcherRight = hardwareMap.get(DcMotorEx.class, "LR");
         launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcherLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcherRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        launcherLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+        launcherRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
@@ -69,6 +73,7 @@ public class pidfLauncher extends OpMode {
         // set new Pidf coefficents
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        launcherRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,pidfCoefficients);
         //set motor velocity
 
 

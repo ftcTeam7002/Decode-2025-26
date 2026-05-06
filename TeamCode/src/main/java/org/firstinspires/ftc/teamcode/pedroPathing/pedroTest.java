@@ -34,7 +34,7 @@ public class pedroTest extends OpMode {
     double startTime;
 
     private final Pose startPose = new Pose(15.7,  121.4, Math.toRadians(135)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(26, 117, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose scorePose = new Pose(48, 99.7, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose pickup1Pose = new Pose(46, 85, Math.toRadians(-10));// Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup2Pose = new Pose(46, 60, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
     private final Pose pickup3Pose = new Pose(46, 38, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.

@@ -86,150 +86,151 @@ public class OmniOpMode extends LinearOpMode {
     private DcMotorEx intakeWheels = null;
     public DcMotor odometerAux;
     public DcMotor odometerRight;
+    double flyWheelPower = 1900;
     double targetPosition = 0.18;
+    double P = 8.4;
+    double F = 16;
+
 
     static final double FORWARD_SPEED = 0.6;
     static final double REVERSE_SPEED = -0.6;
 
 
-    @Override
-    public void runOpMode() {
+        @Override
 
-        // Initialize the hardware variables. Note that the strings used here must correspond
-        // to the names assigned during the robot configuration step on the DS or RC devices.
-        frontLeftDrive = hardwareMap.get(DcMotor.class, "FL");
-        backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
-        frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
-        backRightDrive = hardwareMap.get(DcMotor.class, "BR");
-        launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
-        launcherRight = hardwareMap.get(DcMotorEx.class, "LR");
-        intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
-        kicker = hardwareMap.get(Servo.class, "kicker");
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(18.5, 0, 0, 19);
-        launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-        launcherRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-
-        // ########################################################################################
-        // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
-        // ########################################################################################
-        // Most robots need the motors on one side to be reversed to drive forward.
-        // The motor reversals shown here are for a "direct drive" robot (the wheels turn the same direction as the motor shaft)
-        // If your robot has additional gear reductions or uses a right-angled drive, it's important to ensure
-        // that your motors are turning in the correct direction.  So, start out with the reversals here, BUT
-        // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
-        // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
-        // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        odometerAux = frontLeftDrive;
-        frontLeftDrive.getCurrentPosition();
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        odometerRight = frontRightDrive;
-        frontRightDrive.getCurrentPosition();
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
-
-        launcherLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        launcherRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        intakeWheels.setDirection(DcMotorSimple.Direction.REVERSE);
-        kicker.setDirection(Servo.Direction.FORWARD);
-
-        // Wait for the game to start (driver presses START)
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-
-        waitForStart();
-        runtime.reset();
-
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            double max;
-
-            // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral = gamepad1.left_stick_x;
-            double yaw = gamepad1.right_stick_x;
+        public void runOpMode() {
 
 
-            // Combine the joystick requests for each axis-motion to determine each wheel's power.
-            // Set up a variable for each drive wheel to save the power level for telemetry.
-            double frontLeftPower = axial + lateral + yaw;
-            double frontRightPower = axial - lateral - yaw;
-            double backLeftPower = axial - lateral + yaw;
-            double backRightPower = axial + lateral - yaw;
+            // Initialize the hardware variables. Note that the strings used here must correspond
+            // to the names assigned during the robot configuration step on the DS or RC devices.
+            frontLeftDrive = hardwareMap.get(DcMotor.class, "FL");
+            backLeftDrive = hardwareMap.get(DcMotor.class, "BL");
+            frontRightDrive = hardwareMap.get(DcMotor.class, "FR");
+            backRightDrive = hardwareMap.get(DcMotor.class, "BR");
+            launcherLeft = hardwareMap.get(DcMotorEx.class, "LL");
+            launcherRight = hardwareMap.get(DcMotorEx.class, "LR");
+            intakeWheels = hardwareMap.get(DcMotorEx.class, "IW");
+            kicker = hardwareMap.get(Servo.class, "kicker");
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(6.75, 0, 0, 18);
+            launcherLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+            launcherRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-            // Normalize the values so no wheel power exceeds 100%
-            // This ensures that the robot maintains the desired motion.
-            max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
-            max = Math.max(max, Math.abs(backLeftPower));
-            max = Math.max(max, Math.abs(backRightPower));
+            // ########################################################################################
+            // !!!            IMPORTANT Drive Information. Test your motor directions.              !!!
+            // ########################################################################################
+            // Most robots need the motors on one side to be reversed to drive forward.
+            // The motor reversals shown here are for a "direct drive" robot (the wheels turn the same direction as the motor shaft)
+            // If your robot has additional gear reductions or uses a right-angled drive, it's important to ensure
+            // that your motors are turning in the correct direction.  So, start out with the reversals here, BUT
+            // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
+            // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
+            // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
+            odometerAux = frontLeftDrive;
+            frontLeftDrive.getCurrentPosition();
+            frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            odometerRight = frontRightDrive;
+            frontRightDrive.getCurrentPosition();
+            frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-            if (max > 1.0) {
-                frontLeftPower /= max;
-                frontRightPower /= max;
-                backLeftPower /= max;
-                backRightPower /= max;
-            }
+            frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+            frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            // Send calculated power to wheels
-            frontLeftDrive.setPower(frontLeftPower);
-            frontRightDrive.setPower(frontRightPower);
-            backLeftDrive.setPower(backLeftPower);
-            backRightDrive.setPower(backRightPower);
+            frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+            backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+            frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
+            backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
-            // launcher
-            if (gamepad1.right_bumper) {
-                launcherLeft.setVelocity(2100);
-                launcherRight.setVelocity(2100);
-            }
-            else launcherRight.setVelocity(0);
-            launcherLeft.setVelocity(0);
+            launcherLeft.setDirection(DcMotorEx.Direction.REVERSE);
+            launcherRight.setDirection(DcMotorSimple.Direction.FORWARD);
+            launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            intakeWheels.setDirection(DcMotorSimple.Direction.REVERSE);
+            kicker.setDirection(Servo.Direction.FORWARD);
 
-            if (gamepad1.y) {
-                kicker.setPosition(0.35);
-            }
-            else kicker.setPosition(0.18);
-
-
-            // intakeWheels
-            if(gamepad1.b) {
-                intakeWheels.setVelocity(750);
-            }
-            else intakeWheels.setPower(0);
-
-            if (gamepad1.x) {
-                intakeWheels.setPower(-1500);
-            } else intakeWheels.setPower(0);
-
-
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("Aux Odo", odometerAux.getCurrentPosition());
-            telemetry.addData("Right Odo", odometerRight.getCurrentPosition());
-            telemetry.addData( "LL Velocity", launcherLeft.getVelocity());
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
-            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
-            telemetry.addData("Motor Power", launcherLeft.getPower());
+            // Wait for the game to start (driver presses START)
+            telemetry.addData("Status", "Initialized");
             telemetry.update();
+
+            waitForStart();
+            runtime.reset();
+
+            // run until the end of the match (driver presses STOP)
+            while (opModeIsActive()) {
+                double max;
+
+                // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+                double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+                double lateral = gamepad1.left_stick_x;
+                double yaw = gamepad1.right_stick_x;
+
+
+                // Combine the joystick requests for each axis-motion to determine each wheel's power.
+                // Set up a variable for each drive wheel to save the power level for telemetry.
+                double frontLeftPower = axial + lateral + yaw;
+                double frontRightPower = axial - lateral - yaw;
+                double backLeftPower = axial - lateral + yaw;
+                double backRightPower = axial + lateral - yaw;
+
+                // Normalize the values so no wheel power exceeds 100%
+                // This ensures that the robot maintains the desired motion.
+                max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
+                max = Math.max(max, Math.abs(backLeftPower));
+                max = Math.max(max, Math.abs(backRightPower));
+                if (max > 1.0) {
+                    frontLeftPower /= max;
+                    frontRightPower /= max;
+                    backLeftPower /= max;
+                    backRightPower /= max;
+                }
+
+
+                // Send calculated power to wheels
+                frontLeftDrive.setPower(frontLeftPower);
+                frontRightDrive.setPower(frontRightPower);
+                backLeftDrive.setPower(backLeftPower);
+                backRightDrive.setPower(backRightPower);
+
+                // launcher
+                if (gamepad1.right_bumper) {
+                    launcherLeft.setVelocity(flyWheelPower);
+                    launcherRight.setVelocity(flyWheelPower);
+                } else launcherRight.setVelocity(550);
+                launcherLeft.setVelocity(550);
+
+                if (gamepad1.y) {
+                    kicker.setPosition(0.35);
+                } else kicker.setPosition(0.13);
+
+
+                // intakeWheels
+                if (gamepad1.b) {
+                    intakeWheels.setVelocity(750);
+                } else intakeWheels.setPower(0);
+
+                if (gamepad1.x) {
+                    intakeWheels.setPower(-1500);
+                } else intakeWheels.setPower(0);
+
+                    // Show the elapsed game time and wheel power.
+                telemetry.addData("Aux Odo", odometerAux.getCurrentPosition());
+                telemetry.addData("Right Odo", odometerRight.getCurrentPosition());
+                telemetry.addData("LL Velocity", launcherLeft.getVelocity());
+                telemetry.addData("Status", "Run Time: " + runtime.toString());
+                telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
+                telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
+                telemetry.addData("Motor Power", launcherLeft.getPower());
+                telemetry.update();
+                }
+            }
         }
-    }
-}
